@@ -27,7 +27,7 @@ main{position:relative;z-index:1;max-width:1240px;margin:auto;padding:0 24px 38p
 <div class="searchbox"><input id="search" aria-label="البحث في الأعطال" placeholder="ابحث برقم العطل أو المعدة أو المغذي أو الموقع…"><select id="statusFilter" aria-label="تصفية الحالة"><option value="">كل الحالات</option><option>تم الانتهاء</option><option>تم الانتهاء وبحاجة إلى جدولة</option></select><button class="btn primary" id="searchBtn">بحث⌕</button></div><p class="hint">البحث والاستعراض متاحان دون تسجيل دخول.</p></section>
 <div class="stats"><div class="stat glass"><div class="label"><i class="dot"></i>إجمالي الأعطال</div><strong id="totalCount">0</strong></div><div class="stat glass"><div class="label"><i class="dot"></i>تم الانتهاء وبحاجة إلى جدولة</div><strong id="scheduleCount">0</strong></div><div class="stat glass"><div class="label"><i class="dot"></i>تم الانتهاء</div><strong id="doneCount">0</strong></div></div>
 <div class="sectionhead"><div><h3>سجل الأعطال المنشورة</h3><p>استعرض التفاصيل والصور المسجلة لكل عطل.</p></div><button class="btn primary" id="addBtn" style="display:none">＋ إضافة عطل جديد</button></div>
-<div id="publicNotice" class="notice">هذه نسخة واجهة أولية. لا توجد بعد قاعدة بيانات مركزية أو تسجيل دخول فعلي؛ السجلات التجريبية محفوظة محليًا في هذا المتصفح فقط. لا تستخدمها لتوثيق بيانات تشغيلية حقيقية قبل إكمال الربط الآمن.</div>
+<div id="publicNotice" class="notice">يتم تحميل السجلات من قاعدة البيانات المركزية. لا تُدخل بيانات تشغيلية إذا ظهرت رسالة تعذّر الاتصال.</div>
 <div id="records" class="records"><div class="empty glass">لا توجد سجلات منشورة حتى الآن.<br>عند ربط قاعدة البيانات ستظهر الأعطال والصور هنا.</div></div>
 <section id="formPanel" class="glass"><div class="sectionhead"><div><h3>إضافة سجل عطل</h3><p>أدخل بيانات العطل وأرفق صور قبل الإصلاح وبعده مباشرة.</p></div><button class="btn secondary" id="closeForm">إغلاق ✕</button></div>
 <form id="faultForm"><div class="formgrid">
@@ -40,18 +40,107 @@ main{position:relative;z-index:1;max-width:1240px;margin:auto;padding:0 24px 38p
 <div class="group full"><label for="description">وصف العطل والإجراء المتخذ *</label><textarea id="description" class="field" required maxlength="3000" placeholder="اشرح العطل والملاحظات والإجراء المتخذ…"></textarea></div>
 <div class="group full"><label>صور قبل الإصلاح (اختيارية)</label><div class="filebox"><input id="beforePhotos" type="file" accept="image/*" multiple><div id="beforePreview" class="preview"></div></div></div>
 <div class="group full"><label>صور بعد الإصلاح (اختيارية)</label><div class="filebox"><input id="afterPhotos" type="file" accept="image/*" multiple><div id="afterPreview" class="preview"></div></div></div>
-</div><button class="btn primary" type="submit" style="width:100%">حفظ العطل والصور</button><p class="muted">هذه الواجهة لا تمنح صلاحية آمنة بحد ذاتها. يلزم تفعيل التحقق من المشرف على الخادم قبل الاستخدام الفعلي.</p></form></section>
+</div><button class="btn primary" type="submit" style="width:100%">حفظ العطل والصور</button><p class="muted">سيتم حفظ سجل العطل والصور في قاعدة البيانات المركزية عند الضغط على زر الحفظ.</p></form></section>
 <div class="footer">الشركة السعودية للطاقة · قسم الصيانة · <span>توثيق الأعطال</span></div>
 </main>
-<div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modalbox glass"><h3 id="loginTitle">دخول المشرفين</h3><p>تسجيل الدخول الفعلي يحتاج إلى ربط مزوّد هوية آمن. لا تُدخل كلمة مرورك في هذه النسخة التجريبية.</p><div class="notice">لم يتم إعداد المصادقة الخلفية بعد؛ هذا النموذج لا يتحقق من الهوية ولا يفعّل صلاحيات حقيقية.</div><button class="btn secondary" id="closeLogin" style="width:100%">إغلاق</button></div></div>
+<div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="loginTitle"><div class="modalbox glass"><h3 id="loginTitle">دخول المشرفين</h3><p>سجّل الدخول بالحساب المعتمد لإدارة الأعطال والصور.</p><form id="loginForm"><div class="group"><label for="loginEmail">البريد الإلكتروني</label><input id="loginEmail" class="field" type="email" autocomplete="username" required></div><div class="group"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" class="field" type="password" autocomplete="current-password" required></div><p id="loginError" class="loginError" role="alert"></p><div class="formActions"><button class="btn primary" id="loginSubmit" type="submit">تسجيل الدخول</button><button class="btn secondary" type="button" id="closeLogin">إغلاق</button></div></form></div></div>
+<div class="modal" id="imageModal" role="dialog" aria-modal="true"><div class="modalbox glass" style="width:min(520px,100%)"><h3>إضافة صور بعد الإصلاح</h3><p>اختر صور ما بعد الإصلاح لإضافتها إلى سجل العطل وحفظها مباشرة.</p><input id="existingAfterPhotos" type="file" class="field" accept="image/*" multiple><div id="existingAfterPreview" class="preview"></div><p id="imageError" class="loginError"></p><div class="formActions"><button class="btn primary" id="saveAfterPhotos">حفظ الصور</button><button class="btn secondary" id="closeImageModal">إغلاق</button></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./supabase-config.js"></script>
 <script>
-const KEY='fault-documentation-demo-v1', $=id=>document.getElementById(id);let faults=[];try{faults=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){faults=[]}
+const $=id=>document.getElementById(id);
+const STATUS_DONE='تم الانتهاء', STATUS_SCHEDULE='تم الانتهاء وبحاجة إلى جدولة';
+let db=null, session=null, isAdmin=false, faults=[], selectedPhotoFault=null;
+const configured=!!(window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey && !window.SUPABASE_CONFIG.url.includes('YOUR_') && !window.SUPABASE_CONFIG.anonKey.includes('YOUR_'));
 $('date').value=new Date().toISOString().slice(0,10);
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function persist(){try{localStorage.setItem(KEY,JSON.stringify(faults));render()}catch(e){alert('تعذر الحفظ؛ قد تكون مساحة التخزين ممتلئة. استخدم صورًا أقل أو أصغر.')}}
-function render(){const q=$('search').value.trim().toLowerCase(),st=$('statusFilter').value;const shown=faults.filter(f=>(!st||f.status===st)&&[f.id,f.equipment,f.feeder,f.location,f.description,f.reporter].join(' ').toLowerCase().includes(q));$('totalCount').textContent=faults.length;$('scheduleCount').textContent=faults.filter(f=>f.status==='تم الانتهاء وبحاجة إلى جدولة').length;$('doneCount').textContent=faults.filter(f=>f.status==='تم الانتهاء').length;if(!shown.length){$('records').innerHTML='<div class="empty glass">'+(faults.length?'لا توجد نتائج مطابقة.':'لا توجد سجلات منشورة حتى الآن.<br>عند ربط قاعدة البيانات ستظهر الأعطال والصور هنا.')+'</div>';return}$('records').innerHTML=shown.map(f=>'<article class="record glass"><div class="recordtop"><div><h4>'+safe(f.equipment)+'</h4><span class="id">'+safe(f.id)+'</span><div class="meta">الموقع: '+safe(f.location)+'<br>المغذي: '+safe(f.feeder||'—')+' · التاريخ: '+safe(f.date)+'<br>المبلّغ: '+safe(f.reporter||'—')+'</div></div><span class="badge '+(f.status==='تم الانتهاء'?'done':'')+'">'+safe(f.status)+'</span></div><p class="desc">'+safe(f.description)+'</p>'+((f.before?.length||f.after?.length)?'<div class="meta">الصور المرفقة</div><div class="faultphotos">'+[...(f.before||[]).map(x=>({...x,kind:'قبل الإصلاح'})),...(f.after||[]).map(x=>({...x,kind:'بعد الإصلاح'}))].map(x=>'<img src="'+safe(x.data||'')+'" alt="'+safe(x.kind)+'" title="'+safe(x.kind)+'" loading="lazy">').join('')+'</div>':'')+'<div class="recordActions" data-admin-actions="'+safe(f.id)+'" style="display:none"><button class="btn secondary" data-toggle="'+safe(f.id)+'">'+(f.status==='تم الانتهاء'?'تغيير إلى: تم الانتهاء وبحاجة إلى جدولة':'تغيير إلى: تم الانتهاء')+'</button><button class="btn danger" data-delete="'+safe(f.id)+'">حذف السجل</button></div></article>').join('');document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{const f=faults.find(x=>x.id===b.dataset.toggle);if(f){f.status=f.status==='تم الانتهاء'?'تم الانتهاء وبحاجة إلى جدولة':'تم الانتهاء';persist()}});document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{if(confirm('حذف السجل من هذا المتصفح؟')){faults=faults.filter(x=>x.id!==b.dataset.delete);persist()}})}
-function imageData(files){return Promise.all([...files].map(file=>new Promise((resolve,reject)=>{if(!file.type.startsWith('image/')){reject(new Error('اختر ملفات صور فقط.'));return}if(file.size>900000){reject(new Error('حجم كل صورة يجب ألا يتجاوز 900 كيلوبايت في النسخة التجريبية.'));return}const r=new FileReader();r.onload=()=>resolve({name:file.name,data:r.result});r.onerror=reject;r.readAsDataURL(file)})))}
-function preview(inputId,previewId){$(inputId).addEventListener('change',e=>{const box=$(previewId);box.innerHTML='';[...e.target.files].forEach(f=>{if(f.type.startsWith('image/')){const img=document.createElement('img');img.alt=f.name;img.src=URL.createObjectURL(f);box.appendChild(img)}})})}preview('beforePhotos','beforePreview');preview('afterPhotos','afterPreview');
-$('faultForm').addEventListener('submit',async e=>{e.preventDefault();const btn=e.submitter;btn.disabled=true;try{const before=await imageData($('beforePhotos').files),after=await imageData($('afterPhotos').files);faults.unshift({id:'FLT-'+Date.now().toString(36).toUpperCase(),equipment:$('equipment').value.trim(),feeder:$('feeder').value.trim(),location:$('location').value.trim(),date:$('date').value,status:$('status').value,reporter:$('reporter').value.trim(),description:$('description').value.trim(),before,after,createdAt:new Date().toISOString()});persist();e.target.reset();$('date').value=new Date().toISOString().slice(0,10);$('beforePreview').innerHTML='';$('afterPreview').innerHTML='';$('formPanel').style.display='none';window.scrollTo({top:0,behavior:'smooth'})}catch(err){alert(err.message||'تعذر حفظ السجل.')}finally{btn.disabled=false}});
-$('search').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('searchBtn').onclick=render;$('loginBtn').onclick=()=>$('loginModal').style.display='flex';$('closeLogin').onclick=()=>$('loginModal').style.display='none';$('loginModal').addEventListener('click',e=>{if(e.target===$('loginModal'))$('loginModal').style.display='none'});$('addBtn').onclick=()=>$('formPanel').scrollIntoView({behavior:'smooth'});$('closeForm').onclick=()=>$('formPanel').style.display='none';render();
+function statusClass(s){return s===STATUS_DONE?'done':''}
+function showNotice(message,kind='info'){const el=$('publicNotice');el.textContent=message;el.style.display='block';if(kind==='error'){el.style.borderColor='#ff9cac80';el.style.color='#ffdce1'}else{el.style.borderColor='';el.style.color=''}}
+function hideNotice(){$('publicNotice').style.display='none'}
+function dbRecord(row){return {id:row.id,equipment:row.equipment,feeder:row.feeder,location:row.location,date:row.fault_date,status:row.status,reporter:row.reporter,description:row.description,before_images:row.before_images||[],after_images:row.after_images||[],created_at:row.created_at}}
+function render(){
+ const q=$('search').value.trim().toLowerCase(), st=$('statusFilter').value;
+ const shown=faults.filter(f=>(!st||f.status===st)&&[f.id,f.equipment,f.feeder,f.location,f.description,f.reporter].join(' ').toLowerCase().includes(q));
+ $('totalCount').textContent=faults.length;
+ $('scheduleCount').textContent=faults.filter(f=>f.status===STATUS_SCHEDULE).length;
+ $('doneCount').textContent=faults.filter(f=>f.status===STATUS_DONE).length;
+ if(!shown.length){$('records').innerHTML='<div class="empty glass">'+(faults.length?'لا توجد نتائج مطابقة.':'لا توجد سجلات منشورة حتى الآن.')+'</div>';return}
+ $('records').innerHTML=shown.map(f=>{
+   const before=(f.before_images||[]).map(url=>({url,kind:'قبل الإصلاح'})),after=(f.after_images||[]).map(url=>({url,kind:'بعد الإصلاح'}));
+   const pics=[...before,...after];
+   const photos=pics.length?'<div class="meta">صور قبل الإصلاح وبعده</div><div class="faultphotos">'+pics.map(x=>'<a href="'+safe(x.url)+'" target="_blank" rel="noopener"><img src="'+safe(x.url)+'" alt="'+safe(x.kind)+'" title="'+safe(x.kind)+'" loading="lazy"></a>').join('')+'</div>':'';
+   const actions=isAdmin?'<div class="recordActions"><button class="btn secondary" data-toggle="'+safe(f.id)+'">'+(f.status===STATUS_DONE?'تغيير إلى: تم الانتهاء وبحاجة إلى جدولة':'تغيير إلى: تم الانتهاء')+'</button><button class="btn secondary" data-add-after="'+safe(f.id)+'">＋ صور بعد الإصلاح</button><button class="btn danger" data-delete="'+safe(f.id)+'">حذف السجل</button></div>':'';
+   return '<article class="record glass"><div class="recordtop"><div><h4>'+safe(f.equipment)+'</h4><span class="id">'+safe(String(f.id).slice(0,8))+'</span><div class="meta">الموقع: '+safe(f.location)+'<br>المغذي: '+safe(f.feeder||'—')+' · التاريخ: '+safe(f.date||'—')+'<br>المبلّغ: '+safe(f.reporter||'—')+'</div></div><span class="badge '+statusClass(f.status)+'">'+safe(f.status)+'</span></div><p class="desc">'+safe(f.description)+'</p>'+photos+actions+'</article>'
+ }).join('');
+ document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=async()=>{const f=faults.find(x=>x.id===b.dataset.toggle);if(!f)return;const next=f.status===STATUS_DONE?STATUS_SCHEDULE:STATUS_DONE;const {error}=await db.from('fault_records').update({status:next,updated_at:new Date().toISOString()}).eq('id',f.id);if(error){alert('تعذر تحديث الحالة: '+error.message);return}await loadFaults()});
+ document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('هل تريد حذف سجل العطل؟'))return;const f=faults.find(x=>x.id===b.dataset.delete);if(!f)return;const urls=[...(f.before_images||[]),...(f.after_images||[])];const paths=urls.map(storagePathFromPublicUrl).filter(Boolean);if(paths.length)await db.storage.from('fault-images').remove(paths);const {error}=await db.from('fault_records').delete().eq('id',f.id);if(error){alert('تعذر حذف السجل: '+error.message);return}await loadFaults()});
+ document.querySelectorAll('[data-add-after]').forEach(b=>b.onclick=()=>{selectedPhotoFault=b.dataset.addAfter;$('existingAfterPhotos').value='';$('existingAfterPreview').innerHTML='';$('imageError').textContent='';$('imageModal').style.display='flex'});
+}
+function storagePathFromPublicUrl(url){try{const u=new URL(url);const mark='/storage/v1/object/public/fault-images/';const i=u.pathname.indexOf(mark);return i>=0?decodeURIComponent(u.pathname.slice(i+mark.length)):null}catch{return null}}
+async function loadFaults(){
+ if(!db){faults=[];render();return}
+ const {data,error}=await db.from('fault_records').select('*').order('created_at',{ascending:false});
+ if(error){showNotice('تعذر تحميل السجلات من قاعدة البيانات. تحقق من إعدادات Supabase وصلاحيات القراءة.','error');console.error(error);return}
+ faults=(data||[]).map(dbRecord);hideNotice();render()
+}
+async function uploadImages(files,faultId,kind){
+ const urls=[];
+ for(const file of [...files]){
+  if(!file.type.startsWith('image/'))throw new Error('اختر ملفات صور فقط.');
+  const blob=await compressImage(file);
+  const ext='jpg',path=faultId+'/'+kind+'/'+Date.now()+'-'+crypto.randomUUID()+'.'+ext;
+  const {error}=await db.storage.from('fault-images').upload(path,blob,{contentType:'image/jpeg',upsert:false});
+  if(error)throw new Error('تعذر رفع الصورة: '+error.message);
+  const {data}=db.storage.from('fault-images').getPublicUrl(path);urls.push(data.publicUrl);
+ }
+ return urls;
+}
+function compressImage(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onerror=()=>reject(new Error('تعذرت قراءة الصورة.'));reader.onload=()=>{const img=new Image();img.onerror=()=>reject(new Error('ملف الصورة غير صالح.'));img.onload=()=>{const max=1600,scale=Math.min(1,max/Math.max(img.width,img.height));const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.width*scale));canvas.height=Math.max(1,Math.round(img.height*scale));canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);canvas.toBlob(blob=>blob?resolve(blob):reject(new Error('تعذر تجهيز الصورة.')),'image/jpeg',.82)};img.src=reader.result};reader.readAsDataURL(file)})}
+function setAdminUI(){
+ $('loginBtn').textContent=isAdmin?'خروج المشرف ↗':'دخول المشرفين ↗';
+ $('addBtn').style.display=isAdmin?'inline-block':'none';
+ $('formPanel').style.display='none';
+ render()
+}
+async function checkAdmin(){
+ session=(await db.auth.getSession()).data.session;
+ isAdmin=false;
+ if(session){const {data,error}=await db.from('admin_profiles').select('user_id,role').eq('user_id',session.user.id).maybeSingle();if(!error&&data&&data.role==='admin')isAdmin=true;else if(error)console.error('Admin profile check failed',error)}
+ setAdminUI();
+ if(session&&!isAdmin)showNotice('تم تسجيل الدخول، لكن هذا الحساب غير معتمد لإدارة الأعطال.','error');
+}
+async function init(){
+ if(!configured||!window.supabase?.createClient){showNotice('يلزم إكمال إعداد اتصال Supabase في ملف supabase-config.js قبل تفعيل السجلات الحية.','error');render();return}
+ db=window.supabase.createClient(window.SUPABASE_CONFIG.url,window.SUPABASE_CONFIG.anonKey);
+ db.auth.onAuthStateChange(async(_event,newSession)=>{session=newSession;await checkAdmin();await loadFaults()});
+ await checkAdmin();await loadFaults();
+}
+$('faultForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(!isAdmin||!db){alert('سجّل الدخول بحساب مشرف معتمد أولًا.');return}
+ const btn=e.submitter;btn.disabled=true;btn.textContent='جارٍ حفظ العطل والصور…';
+ let insertedId=null,uploaded=[];
+ try{
+  const row={equipment:$('equipment').value.trim(),feeder:$('feeder').value.trim(),location:$('location').value.trim(),fault_date:$('date').value,status:$('status').value,reporter:$('reporter').value.trim(),description:$('description').value.trim(),before_images:[],after_images:[],created_by:session.user.id};
+  const {data,error}=await db.from('fault_records').insert(row).select().single();if(error)throw error;insertedId=data.id;
+  const before=await uploadImages($('beforePhotos').files,insertedId,'before');uploaded.push(...before);
+  const after=await uploadImages($('afterPhotos').files,insertedId,'after');uploaded.push(...after);
+  const {error:updateError}=await db.from('fault_records').update({before_images:before,after_images:after,updated_at:new Date().toISOString()}).eq('id',insertedId);if(updateError)throw updateError;
+  e.target.reset();$('date').value=new Date().toISOString().slice(0,10);$('beforePreview').innerHTML='';$('afterPreview').innerHTML='';$('formPanel').style.display='none';await loadFaults();window.scrollTo({top:0,behavior:'smooth'});
+ }catch(err){console.error(err);if(insertedId&&!uploaded.length){await db.from('fault_records').delete().eq('id',insertedId)}alert('تعذر حفظ العطل كاملًا. '+(err.message||''))}
+ finally{btn.disabled=false;btn.textContent='حفظ العطل والصور'}
+});
+function preview(inputId,previewId){$(inputId).addEventListener('change',e=>{const box=$(previewId);box.innerHTML='';[...e.target.files].forEach(f=>{if(f.type.startsWith('image/')){const img=document.createElement('img');img.alt=f.name;img.src=URL.createObjectURL(f);box.appendChild(img)}})})}
+preview('beforePhotos','beforePreview');preview('afterPhotos','afterPreview');
+$('existingAfterPhotos').addEventListener('change',e=>{const box=$('existingAfterPreview');box.innerHTML='';[...e.target.files].forEach(f=>{if(f.type.startsWith('image/')){const img=document.createElement('img');img.alt=f.name;img.src=URL.createObjectURL(f);box.appendChild(img)}})});
+$('saveAfterPhotos').onclick=async()=>{if(!isAdmin||!selectedPhotoFault)return;const btn=$('saveAfterPhotos');btn.disabled=true;$('imageError').textContent='جارٍ رفع الصور…';try{const f=faults.find(x=>x.id===selectedPhotoFault);if(!f)throw new Error('لم يتم العثور على سجل العطل.');const urls=await uploadImages($('existingAfterPhotos').files,f.id,'after');const merged=[...(f.after_images||[]),...urls];const {error}=await db.from('fault_records').update({after_images:merged,updated_at:new Date().toISOString()}).eq('id',f.id);if(error)throw error;$('imageModal').style.display='none';await loadFaults()}catch(err){$('imageError').textContent=err.message||'تعذر حفظ الصور'}finally{btn.disabled=false;$('imageError').textContent=$('imageError').textContent==='جارٍ رفع الصور…'?'':$('imageError').textContent}};
+$('closeImageModal').onclick=()=>$('imageModal').style.display='none';
+$('imageModal').addEventListener('click',e=>{if(e.target===$('imageModal'))$('imageModal').style.display='none'});
+$('loginBtn').onclick=async()=>{if(isAdmin){await db.auth.signOut();isAdmin=false;session=null;setAdminUI();await loadFaults()}else{$('loginError').textContent='';$('loginModal').style.display='flex'}};
+$('closeLogin').onclick=()=>$('loginModal').style.display='none';
+$('loginModal').addEventListener('click',e=>{if(e.target===$('loginModal'))$('loginModal').style.display='none'});
+$('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(!db){$('loginError').textContent='اتصال Supabase غير مكتمل.';return}const btn=$('loginSubmit');btn.disabled=true;$('loginError').textContent='جارٍ التحقق…';try{const {error}=await db.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error)throw error;await checkAdmin();if(!isAdmin)throw new Error('هذا الحساب غير معتمد كمشرف.');$('loginModal').style.display='none';$('loginPassword').value='';await loadFaults()}catch(err){$('loginError').textContent=err.message||'تعذر تسجيل الدخول'}finally{btn.disabled=false}});
+$('search').addEventListener('input',render);$('statusFilter').addEventListener('change',render);$('searchBtn').onclick=render;
+$('addBtn').onclick=()=>{if(!isAdmin)return;$('formPanel').style.display='block';$('formPanel').scrollIntoView({behavior:'smooth'})};
+$('closeForm').onclick=()=>$('formPanel').style.display='none';
+init();
 </script></body></html>
