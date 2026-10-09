@@ -31,6 +31,7 @@ create table if not exists public.fault_records (
 alter table public.fault_records drop constraint if exists fault_records_status_check;
 alter table public.fault_records add constraint fault_records_status_check
   check (status in ('تم الانتهاء','تم الانتهاء وبحاجة إلى جدولة'));
+alter table public.fault_records alter column status set default 'تم الانتهاء وبحاجة إلى جدولة';
 
 alter table public.admin_profiles enable row level security;
 alter table public.fault_records enable row level security;
