@@ -17,7 +17,7 @@ create table if not exists public.fault_records (
   feeder text not null default '',
   location text not null,
   fault_date date not null default current_date,
-  status text not null default 'بحاجة إلى جدولة' check (status in ('بحاجة إلى جدولة','قيد المعالجة','تم الإصلاح')),
+  status text not null default 'قيد المعالجة' check (status in ('قيد المعالجة','بحاجة إلى جدولة','تم الإصلاح')),
   reporter text not null default '',
   description text not null,
   before_images text[] not null default '{}',
