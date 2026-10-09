@@ -26,7 +26,7 @@ main{position:relative;z-index:1;max-width:1240px;margin:auto;padding:0 24px 38p
 <section class="hero"><span class="eyebrow">FAULT DOCUMENTATION · MAINTENANCE</span><h2>وثّق العطل،<span>وارجع إليه بسهولة.</span></h2><p>منصة موحدة لاستعراض سجلات الأعطال والصور، والبحث عن المعدة أو المغذي أو الموقع. يمكن للجميع الاستعراض، وتبقى الإضافة والإدارة للمشرفين المعتمدين فقط.</p>
 <div class="searchbox"><input id="search" aria-label="البحث في الأعطال" placeholder="ابحث برقم العطل أو المعدة أو المغذي أو الموقع…"><select id="statusFilter" aria-label="تصفية الحالة"><option value="">كل الحالات</option><option>تم الانتهاء</option><option>تم الانتهاء وبحاجة إلى جدولة</option></select><button class="btn primary" id="searchBtn">بحث⌕</button></div><p class="hint">البحث والاستعراض متاحان دون تسجيل دخول.</p></section>
 <div class="stats"><div class="stat glass"><div class="label"><i class="dot"></i>إجمالي الأعطال</div><strong id="totalCount">0</strong></div><div class="stat glass"><div class="label"><i class="dot"></i>تم الانتهاء وبحاجة إلى جدولة</div><strong id="scheduleCount">0</strong></div><div class="stat glass"><div class="label"><i class="dot"></i>تم الانتهاء</div><strong id="doneCount">0</strong></div></div>
-<div class="sectionhead"><div><h3>سجل الأعطال المنشورة</h3><p>استعرض التفاصيل والصور المسجلة لكل عطل.</p></div><button class="btn primary" id="addBtn" style="display:none">＋ إضافة عطل جديد</button></div>
+<div class="sectionhead"><div><h3>سجل الأعطال المنشورة</h3><p>استعرض التفاصيل والصور المسجلة لكل عطل.</p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn secondary" id="adminManageBtn" href="./admin-management.html" style="display:none;text-decoration:none">إدارة المشرفين</a><button class="btn primary" id="addBtn" style="display:none">＋ إضافة عطل جديد</button></div></div>
 <div id="publicNotice" class="notice">يتم تحميل السجلات من قاعدة البيانات المركزية. لا تُدخل بيانات تشغيلية إذا ظهرت رسالة تعذّر الاتصال.</div>
 <div id="records" class="records"><div class="empty glass">لا توجد سجلات منشورة حتى الآن.<br>عند ربط قاعدة البيانات ستظهر الأعطال والصور هنا.</div></div>
 <section id="formPanel" class="glass"><div class="sectionhead"><div><h3>إضافة سجل عطل</h3><p>أدخل بيانات العطل وأرفق صور قبل الإصلاح وبعده مباشرة.</p></div><button class="btn secondary" id="closeForm">إغلاق ✕</button></div>
@@ -50,7 +50,7 @@ main{position:relative;z-index:1;max-width:1240px;margin:auto;padding:0 24px 38p
 <script>
 const $=id=>document.getElementById(id);
 const STATUS_DONE='تم الانتهاء', STATUS_SCHEDULE='تم الانتهاء وبحاجة إلى جدولة';
-let db=null, session=null, isAdmin=false, faults=[], selectedPhotoFault=null;
+let db=null, session=null, isAdmin=false, isSuperAdmin=false, faults=[], selectedPhotoFault=null;
 const configured=!!(window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url && window.SUPABASE_CONFIG.anonKey && !window.SUPABASE_CONFIG.url.includes('YOUR_') && !window.SUPABASE_CONFIG.anonKey.includes('YOUR_'));
 $('date').value=new Date().toISOString().slice(0,10);
 function safe(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -99,13 +99,14 @@ function compressImage(file){return new Promise((resolve,reject)=>{const reader=
 function setAdminUI(){
  $('loginBtn').textContent=isAdmin?'خروج المشرف ↗':'دخول المشرفين ↗';
  $('addBtn').style.display=isAdmin?'inline-block':'none';
+ $('adminManageBtn').style.display=isSuperAdmin?'inline-block':'none';
  $('formPanel').style.display='none';
  render()
 }
 async function checkAdmin(){
  session=(await db.auth.getSession()).data.session;
- isAdmin=false;
- if(session){const {data,error}=await db.from('admin_profiles').select('user_id,role').eq('user_id',session.user.id).maybeSingle();if(!error&&data&&data.role==='admin')isAdmin=true;else if(error)console.error('Admin profile check failed',error)}
+ isAdmin=false;isSuperAdmin=false;
+ if(session){const {data,error}=await db.from('admin_profiles').select('user_id,role,is_active,is_superadmin').eq('user_id',session.user.id).maybeSingle();if(!error&&data&&data.role==='admin'&&data.is_active!==false){isAdmin=true;isSuperAdmin=data.is_superadmin===true}else if(error)console.error('Admin profile check failed',error)}
  setAdminUI();
  if(session&&!isAdmin)showNotice('تم تسجيل الدخول، لكن هذا الحساب غير معتمد لإدارة الأعطال.','error');
 }
