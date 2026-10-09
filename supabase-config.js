@@ -3,6 +3,6 @@
 // The anon/publishable key is intended for browser use with RLS enabled.
 // NEVER place the service_role or secret key in this file.
 window.SUPABASE_CONFIG = {
-  url: "YOUR_SUPABASE_PROJECT_URL",
+  url: "https://nsqyufutdirdfvfvregv.supabase.co",
   anonKey: "sb_publishable_h4BJ5ExQLBiWYWB3PYbPYw_Q39bOuy5"
 };
