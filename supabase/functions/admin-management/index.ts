@@ -65,7 +65,7 @@ Deno.serve(async (req: Request) => {
       const displayName = typeof payload?.display_name === "string" ? payload.display_name.trim() : "";
       const password = typeof payload?.password === "string" ? payload.password : "";
       if (!/^\d{1,32}$/.test(username)) return reply({ error: "اسم المستخدم يجب أن يكون أرقامًا فقط." }, 400);
-      if (password.length < 6 || password.length > 128) return reply({ error: "كلمة المرور يجب ألا تقل عن 6 خانات." }, 400);
+      if (!/^\\d{6,128}$/.test(password)) return reply({ error: "كلمة المرور يجب أن تكون أرقامًا فقط وبطول 6 خانات على الأقل." }, 400);
       if (!displayName || displayName.length > 100) return reply({ error: "أدخل اسم المشرف بحد أقصى 100 حرف." }, 400);
       const { data: existing, error: existingError } = await admin.from("admin_profiles")
         .select("user_id").eq("username", username).maybeSingle();
