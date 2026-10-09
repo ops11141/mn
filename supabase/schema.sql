@@ -30,6 +30,11 @@ create table if not exists public.fault_records (
 alter table public.admin_profiles enable row level security;
 alter table public.fault_records enable row level security;
 
+-- Explicit API privileges because automatic table exposure is disabled in project setup.
+grant select on public.fault_records to anon, authenticated;
+grant insert, update, delete on public.fault_records to authenticated;
+grant select on public.admin_profiles to authenticated;
+
 drop policy if exists "Admins can read own profile" on public.admin_profiles;
 create policy "Admins can read own profile"
 on public.admin_profiles for select to authenticated
