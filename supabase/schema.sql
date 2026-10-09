@@ -17,7 +17,7 @@ create table if not exists public.fault_records (
   feeder text not null default '',
   location text not null,
   fault_date date not null default current_date,
-  status text not null default 'قيد المعالجة' check (status in ('قيد المعالجة','بحاجة إلى جدولة','تم الإصلاح')),
+  status text not null default 'تم الانتهاء وبحاجة إلى جدولة' check (status in ('تم الانتهاء','تم الانتهاء وبحاجة إلى جدولة')),
   reporter text not null default '',
   description text not null,
   before_images text[] not null default '{}',
@@ -30,7 +30,7 @@ create table if not exists public.fault_records (
 -- Keep the status constraint compatible when this script is run on an existing project.
 alter table public.fault_records drop constraint if exists fault_records_status_check;
 alter table public.fault_records add constraint fault_records_status_check
-  check (status in ('بحاجة إلى جدولة','قيد المعالجة','تم الإصلاح'));
+  check (status in ('تم الانتهاء','تم الانتهاء وبحاجة إلى جدولة'));
 
 alter table public.admin_profiles enable row level security;
 alter table public.fault_records enable row level security;
