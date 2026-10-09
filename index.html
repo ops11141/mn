@@ -112,7 +112,7 @@ async function checkAdmin(){
 async function init(){
  if(!configured||!window.supabase?.createClient){showNotice('يلزم إكمال إعداد اتصال Supabase في ملف supabase-config.js قبل تفعيل السجلات الحية.','error');render();return}
  db=window.supabase.createClient(window.SUPABASE_CONFIG.url,window.SUPABASE_CONFIG.anonKey);
- db.auth.onAuthStateChange(async(_event,newSession)=>{session=newSession;await checkAdmin();await loadFaults()});
+ db.auth.onAuthStateChange((_event,newSession)=>{session=newSession;setTimeout(async()=>{await checkAdmin();await loadFaults()},0)});
  await checkAdmin();await loadFaults();
 }
 $('faultForm').addEventListener('submit',async e=>{
@@ -126,7 +126,7 @@ $('faultForm').addEventListener('submit',async e=>{
   const after=await uploadImages($('afterPhotos').files,insertedId,'after');uploaded.push(...after);
   const {error:updateError}=await db.from('fault_records').update({before_images:before,after_images:after,updated_at:new Date().toISOString()}).eq('id',insertedId);if(updateError)throw updateError;
   e.target.reset();$('date').value=new Date().toISOString().slice(0,10);$('beforePreview').innerHTML='';$('afterPreview').innerHTML='';$('formPanel').style.display='none';await loadFaults();window.scrollTo({top:0,behavior:'smooth'});
- }catch(err){console.error(err);if(insertedId&&!uploaded.length){await db.from('fault_records').delete().eq('id',insertedId)}alert('تعذر حفظ العطل كاملًا. '+(err.message||''))}
+ }catch(err){console.error(err);if(insertedId){const paths=uploaded.map(storagePathFromPublicUrl).filter(Boolean);if(paths.length)await db.storage.from('fault-images').remove(paths);await db.from('fault_records').delete().eq('id',insertedId)}alert('تعذر حفظ العطل كاملًا. '+(err.message||''))}
  finally{btn.disabled=false;btn.textContent='حفظ العطل والصور'}
 });
 function preview(inputId,previewId){$(inputId).addEventListener('change',e=>{const box=$(previewId);box.innerHTML='';[...e.target.files].forEach(f=>{if(f.type.startsWith('image/')){const img=document.createElement('img');img.alt=f.name;img.src=URL.createObjectURL(f);box.appendChild(img)}})})}
