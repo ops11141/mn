@@ -4,5 +4,5 @@
 // NEVER place the service_role or secret key in this file.
 window.SUPABASE_CONFIG = {
   url: "YOUR_SUPABASE_PROJECT_URL",
-  anonKey: "YOUR_SUPABASE_ANON_OR_PUBLISHABLE_KEY"
+  anonKey: "sb_publishable_h4BJ5ExQLBiWYWB3PYbPYw_Q39bOuy5"
 };
